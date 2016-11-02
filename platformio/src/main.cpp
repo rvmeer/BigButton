@@ -1,6 +1,7 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
+#include "saskey.h"
 
 const char* ssid = "Ralf";
 const char* password = "Geheim01!";
@@ -8,7 +9,7 @@ const char* password = "Geheim01!";
 const char* mqtt_server = "ButtonIotHub.azure-devices.net";
 const char* device_id = "BigButtonDevice";
 const char* hub_user = "ButtonIotHub.azure-devices.net/BigButtonDevice";
-const char* hub_pwd = "SharedAccessSignature sr=ButtonIotHub.azure-devices.net&sig=RWY%2Bn1RFcOnM4QH%2FmouBy%2Fs2L8YtlLSer42LBVjDFUg%3D&se=1507399367&skn=iothubowner";
+const char* hub_pwd = SAS_KEY;
 
 const char* redMessage = "{{'color':'Red'}}";
 const char* blueMessage = "{{'color':'Blue'}}";
