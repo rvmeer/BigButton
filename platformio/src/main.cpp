@@ -3,8 +3,8 @@
 #include <WiFiClientSecure.h>
 #include "saskey.h"
 
-const char* ssid = "Ralf";
-const char* password = "Geheim01!";
+const char* ssid = "Ralf 5x";
+const char* password = "BigButton01!";
 
 const char* mqtt_server = "ButtonIotHub.azure-devices.net";
 const char* device_id = "BigButtonDevice";
