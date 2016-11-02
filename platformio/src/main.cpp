@@ -115,5 +115,7 @@ void loop(){
     blueActive = 0;
   }
 
+  applyLedState();
+
   delay(100);
 }
