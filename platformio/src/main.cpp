@@ -11,8 +11,8 @@ const char* device_id = "BigButtonDevice";
 const char* hub_user = "ButtonIotHub.azure-devices.net/BigButtonDevice";
 const char* hub_pwd = SAS_KEY;
 
-const char* redMessage = "{{'color':'Red'}}";
-const char* blueMessage = "{{'color':'Blue'}}";
+const char* redMessage    = "{'color':'Red'}";
+const char* blueMessage   = "{'color':'Blue'}";
 
 
 
@@ -44,6 +44,33 @@ void setup_wifi() {
   Serial.println(WiFi.localIP());
 }
 
+void sendMessage(const char* message){
+  if(client.connected()){
+    Serial.println("Publishing message: " + String(message));
+    client.publish("devices/BigButtonDevice/messages/events/", message);
+  }
+}
+
+void redActivated(){
+  redActive = 1;
+}
+
+void blueActivated(){
+  blueActive = 1;
+}
+
+void applyLedState(){
+  int d1 = digitalRead(D1);
+  int d2 = digitalRead(D2);
+
+  if(d1 || d2){
+    digitalWrite(BUILTIN_LED,LOW); //Led On
+  }
+  else{
+    digitalWrite(BUILTIN_LED, HIGH); //Led Off
+  }
+}
+
 void setup(){
   Serial.begin(115200);
 
@@ -51,8 +78,11 @@ void setup(){
 
   client.setServer(mqtt_server, 8883);
 
-  pinMode(D1, INPUT);               // Set D1 and D2 as input
-  pinMode(D2, INPUT);
+  pinMode(D1, INPUT_PULLUP);               // Set D1 and D2 as input
+  pinMode(D2, INPUT_PULLUP);
+
+  attachInterrupt(D1, redActivated, RISING);
+  attachInterrupt(D2, blueActivated, RISING);
 
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
@@ -69,48 +99,21 @@ void reconnect(){
   }
 }
 
-void sendMessage(const char* message){
-  if(client.connected()){
-    Serial.println("Publishing message: " + String(message));
-    client.publish("devices/BigButtonDevice/messages/events/", message);
-  }
-}
+
 
 void loop(){
   reconnect();
   client.loop();
 
-  int d1 = digitalRead(D1);
-  int d2 = digitalRead(D2);
-
-  Serial.println("D1 = "+String(d1)+", D2 = "+String(d2));
-
-  if(!redActive && d1){
-    redActive=1;
+  if(redActive){
     sendMessage(redMessage);
-  }
-  else{
-    if(!d1){
-      redActive=0;
-    }
+    redActive = 0;
   }
 
-  if(!blueActive && d2){
-    blueActive=1;
+  if(blueActive){
     sendMessage(blueMessage);
-  }
-  else{
-    if(!d2){
-      blueActive=0;
-    }
+    blueActive = 0;
   }
 
-  if(redActive || blueActive){
-    digitalWrite(BUILTIN_LED,LOW); //Led On
-  }
-  else{
-    digitalWrite(BUILTIN_LED, HIGH); //Led Off
-  }
-
-  delay(5000);
+  delay(1000);
 }
