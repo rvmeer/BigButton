@@ -1,0 +1,50 @@
+﻿@model BigButton.Models.ColorModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="row">
+    <div class="col-md-3">
+        <h2><input type="text" id="color" value="@Model.Color" /></h2>
+        <img id="red" src="@Model.Up" />
+    </div>
+</div>
+
+@section scripts{
+<script language="javascript">
+    $(function () {
+        var flag = false;
+
+        function down() {
+            $(this).attr('src', "@Model.Down");
+        }
+
+        function up() {
+            $(this).attr('src', "@Model.Up");
+        }
+
+        function send() {
+            if (!flag) {
+                flag = true;
+                setTimeout(function() { flag = false; }, 10);
+
+                var val = $("#color").val();
+                var cleanString = val.replace(/[|&;$%"<>()+,]/g, "");
+                var url = "/Home/Button/" + cleanString;
+                $.post(url);
+            }
+
+            return false;
+        }
+
+        $("img#red")
+            .mousedown(down)
+            .mouseup(up)
+            .touchstart(down)
+            .touchend(up)
+            .tap(send)
+            .click(send);
+    });
+</script>
+}
+
