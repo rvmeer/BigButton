@@ -1,0 +1,109 @@
+//#include <ESP8266WiFi.h>
+#include <PubSubClient.h>
+#include <Wire.h>
+#include <WiFi101.h>
+
+const char ssid[] = "Ralf";
+const char password[] = "Geheim01!";
+const char clientId[] = "MakerDen.azure-devices.net/MqttDevice";
+const char clientPwd[] = "SharedAccessSignature sr=MakerDen.azure-devices.net%2fdevices%2fMqttDevice&sig=1yDo8Nf5xUYk4upcU5%2flh25HGTaWGmc6rk6kSoidkLE%3d&se=1466676592";
+const char topic[] = "devices/MqttDevice/messages/events/";
+
+WiFiSSLClient tlsClient;
+PubSubClient client("MakerDen.azure-devices.net",(uint)8883,tlsClient);
+
+
+/*
+void initDeviceConfig() { // Example device configuration
+  device.boardType = Other;            // BoardType enumeration: NodeMCU, WeMos, SparkfunThing, Other (defaults to Other). This determines pin number of the onboard LED for wifi and publish status. Other means no LED status
+  device.deepSleepSeconds = 0;         // if greater than zero with call ESP8266 deep sleep (default is 0 disabled). GPIO16 needs to be tied to RST to wake from deepSleep. Causes a reset, execution restarts from beginning of sketch
+  cloud.cloudMode = IoTHub;            // CloudMode enumeration: IoTHub and EventHub (default is IoTHub)
+  cloud.publishRateInSeconds = 90;     // limits publishing rate to specified seconds (default is 90 seconds).  Connectivity problems may result if number too small eg 2
+  cloud.sasExpiryDate = 1737504000;    // Expires Wed, 22 Jan 2025 00:00:00 GMT (defaults to Expires Wed, 22 Jan 2025 00:00:00 GMT)
+}
+*/
+
+
+
+
+void InitMqtt(){
+  if (!client.connected()) {
+    Serial.println("Connecting to MQTT server");
+
+    if (client.connect("MqttDevice",clientId, clientPwd)){
+
+
+        Serial.println("Connected to MQTT server");
+
+        //We're not subscribing, no callback
+        //client.set_callback(callback);
+        //client.subscribe(MQTT::Subscribe().add_topic(MQTT_SUBSCRIBE_TOPIC));
+
+    } else {
+      Serial.println("Could not connect to MQTT server");
+    }
+  }
+}
+
+void publishOverMqtt(){
+  InitMqtt();
+  if (client.connected()){
+    char data[]="test";
+    client.publish(topic, data);
+
+
+    Serial.println("Published message to: " + String(topic));
+    client.loop();
+  } else {
+    Serial.println("Mqtt not connected");
+  }
+}
+
+void initWifi(){
+
+  if (WiFi.status() == WL_CONNECTED) {return;}
+
+
+  Serial.println("Trying to connect to " + String(ssid));
+
+  WiFi.begin(ssid, password);
+
+
+}
+
+void setup() {
+	Serial.begin(9600);
+	delay(100);
+	Serial.println("");
+
+  WiFi.mode(WIFI_STA);  // Ensure WiFi in Station/Client Mode
+
+	//initDeviceConfig();
+/*
+	initCloudConfig("HostName=MakerDen.azure-devices.net;DeviceId=MqttDevice;
+  SharedAccessKey=ZH1hd5b0fDRuEZHG0P8LwRF74yvZ9QrwiQlHaOsJomg=",
+  "dgWAP", "VisualStudio2005", "Melbourne");
+*/
+//  initCloudConfig();  // alternate signature - read config from EEPROM
+
+  initWifi();
+}
+
+
+void loop() {
+
+	if (WiFi.status() == WL_CONNECTED) {
+		//setLedState(On);
+
+
+//    publishToAzure();
+    publishOverMqtt();
+
+    delay(5000);
+	}
+	else {
+    //setLedState(Off);
+    initWifi();
+    delay(250);
+	}
+}
