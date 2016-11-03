@@ -49,6 +49,11 @@ namespace BigButton.Controllers
             return View();
         }
 
+        public IActionResult Report()
+        {
+            return View();
+        }
+
         public IActionResult Error()
         {
             return View();
