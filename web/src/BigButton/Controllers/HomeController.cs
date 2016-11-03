@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using BigButton.Azure;
 using BigButton.Models;
 using Microsoft.Extensions.Options;
-using NUglify.Css;
 
 namespace BigButton.Controllers
 {
@@ -27,6 +26,7 @@ namespace BigButton.Controllers
         {
             try
             {
+                if(FalseColor(color)) throw new Exception($"Vals speler!!! '{color}' wordt alleen gebruikt door de echte knop!");
                 var hub = new IotHub(_iotConfig.Value);
                 hub.SendMessage(color);
                 return Ok();
@@ -35,6 +35,13 @@ namespace BigButton.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        bool FalseColor(string color)
+        {
+            if (color.Equals("ESP Red", StringComparison.OrdinalIgnoreCase)) return true;
+            if (color.Equals("ESP Blue", StringComparison.OrdinalIgnoreCase)) return true;
+            return false;
         }
 
         public IActionResult About()
