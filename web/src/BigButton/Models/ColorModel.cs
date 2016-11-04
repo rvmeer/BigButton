@@ -6,7 +6,7 @@
         public string Down { get; private set; }
         public string Up { get; private set; }
 
-        private static readonly object Sync = new object();
+        static readonly object Sync = new object();
         static bool _red;
 
         public static ColorModel Create()
@@ -21,7 +21,7 @@
             return new ColorModel
             {
                 Color = red ? "Red" : "Blue",
-                Down = red ? "/images/OrangeButton.png" : "/images/RedButton.png",
+                Down = red ? "/images/OrangeButton.png" : "/images/BlueLight.png",
                 Up = red ? "/images/RedButton.png" : "/images/BlueButton.png"
             };
         }

@@ -6,45 +6,73 @@
 <div class="row">
     <div class="col-md-3">
         <h2><input type="text" id="color" value="@Model.Color" /></h2>
-        <img id="red" src="@Model.Up" />
+        <img id="red" src="@Model.Up"/>
+        <h3 id="error" style="color:red"></h3>
     </div>
 </div>
 
 @section scripts{
-<script language="javascript">
-    $(function () {
-        var flag = false;
+    <script language="javascript">
+        $(function() {
+            var flag = false;
 
-        function down() {
-            $(this).attr('src', "@Model.Down");
-        }
-
-        function up() {
-            $(this).attr('src', "@Model.Up");
-        }
-
-        function send() {
-            if (!flag) {
-                flag = true;
-                setTimeout(function() { flag = false; }, 10);
-
-                var val = $("#color").val();
-                var cleanString = val.replace(/[|&;$%"<>()+,]/g, "");
-                var url = "/Home/Button/" + cleanString;
-                $.post(url);
+            function preloadImages(array) {
+                if (!preloadImages.list) {
+                    preloadImages.list = [];
+                }
+                var list = preloadImages.list;
+                for (var i = 0; i < array.length; i++) {
+                    var img = new Image();
+                    img.onload = function() {
+                        var index = list.indexOf(this);
+                        if (index !== -1) {
+                            // remove image from the array once it's loaded
+                            // for memory consumption reasons
+                            list.splice(index, 1);
+                        }
+                    }
+                    list.push(img);
+                    img.src = array[i];
+                }
             }
 
-            return false;
-        }
+            function down() {
+                $(this).attr('src', "@Model.Down");
+            }
 
-        $("img#red")
-            .mousedown(down)
-            .mouseup(up)
-            .touchstart(down)
-            .touchend(up)
-            .tap(send)
-            .click(send);
-    });
-</script>
+            function up() {
+                $(this).attr('src', "@Model.Up");
+            }
+
+            function send() {
+                if (!flag) {
+                    flag = true;
+                    setTimeout(function() { flag = false; }, 10);
+
+                    var val = $("#color").val();
+                    var cleanString = val.replace(/[|&;$%"<>()+,]/g, "");
+                    var url = "/Home/Button/" + cleanString;
+                    $.post(url).fail(function (request, textStatus, errorThrown) {
+                        $("#error").text(request.responseText);
+                    })
+                    .success(function() {
+                        $("#error").text("");
+                    });
+                }
+
+                return false;
+            }
+
+            preloadImages(["@Model.Up", "@Model.Down"]);
+
+            $("img#red")
+                .mousedown(down)
+                .mouseup(up)
+                .touchstart(down)
+                .touchend(up)
+                .tap(send)
+                .click(send);
+        });
+    </script>
 }
 
